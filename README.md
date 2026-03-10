@@ -1,1 +1,225 @@
-this is a to do app. 
+<!DOCTYPE html>
+<html>
+<head>
+<title>Final ToDo App</title>
+
+<style>
+
+body{
+font-family:Arial;
+padding:20px;
+max-width:400px;
+margin:auto;
+transition:0.3s;
+}
+
+input{
+padding:8px;
+margin:4px;
+width:70%;
+}
+
+button{
+padding:6px 10px;
+cursor:pointer;
+margin:3px;
+}
+
+li{
+list-style:none;
+padding:8px;
+margin:6px 0;
+background:#f2f2f2;
+cursor:pointer;
+}
+
+.completed{
+text-decoration:line-through;
+color:gray;
+}
+
+.delete-btn{
+color:red;
+margin-left:10px;
+cursor:pointer;
+}
+
+.edit-btn{
+color:blue;
+margin-left:10px;
+cursor:pointer;
+}
+
+/* DARK MODE */
+
+.dark-mode{
+background-color:#121212;
+color:white;
+}
+
+.dark-mode li{
+background-color:#1f1f1f;
+}
+
+.dark-mode input{
+background-color:#333;
+color:white;
+border:1px solid #555;
+}
+
+</style>
+</head>
+
+<body>
+
+<button id="toggleTheme">Toggle Dark Mode</button>
+
+<h2>Advanced ToDo App</h2>
+
+<input id="taskInput" placeholder="Enter task">
+<button id="addBtn">Add</button>
+
+<br><br>
+
+<input id="searchInput" placeholder="Search tasks...">
+
+<br><br>
+
+<ul id="taskList"></ul>
+
+<p id="counter">Tasks left: 0</p>
+
+<button id="clearCompleted">Clear Completed</button>
+
+<script>
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let searchText = "";
+
+renderTasks();
+
+document.getElementById("addBtn").onclick=function(){
+
+let input=document.getElementById("taskInput");
+let text=input.value.trim();
+
+if(text===""){
+alert("Enter task");
+return;
+}
+
+tasks.push({
+text:text,
+completed:false
+});
+
+input.value="";
+
+renderTasks();
+
+};
+
+document.getElementById("searchInput").oninput=function(){
+searchText=this.value.toLowerCase();
+renderTasks();
+};
+
+document.getElementById("clearCompleted").onclick=function(){
+
+tasks = tasks.filter(function(task){
+return task.completed === false;
+});
+
+renderTasks();
+
+};
+
+document.getElementById("toggleTheme").onclick=function(){
+
+document.body.classList.toggle("dark-mode");
+
+};
+
+function renderTasks(){
+
+let list=document.getElementById("taskList");
+list.innerHTML="";
+
+let activeCount = 0;
+
+for(let i=0;i<tasks.length;i++){
+
+if(!tasks[i].text.toLowerCase().includes(searchText)){
+continue;
+}
+
+let li=document.createElement("li");
+li.innerText=tasks[i].text;
+
+if(tasks[i].completed){
+li.classList.add("completed");
+}
+else{
+activeCount++;
+}
+
+li.onclick=function(){
+tasks[i].completed=!tasks[i].completed;
+renderTasks();
+};
+
+let edit=document.createElement("span");
+edit.innerText=" ✏️";
+edit.className="edit-btn";
+
+edit.onclick=function(e){
+
+e.stopPropagation();
+
+let newText=prompt("Edit task:",tasks[i].text);
+
+if(newText===null){
+return;
+}
+
+newText=newText.trim();
+
+if(newText===""){
+alert("Task cannot be empty");
+return;
+}
+
+tasks[i].text=newText;
+
+renderTasks();
+
+};
+
+let del=document.createElement("span");
+del.innerText=" ❌";
+del.className="delete-btn";
+
+del.onclick=function(e){
+e.stopPropagation();
+tasks.splice(i,1);
+renderTasks();
+};
+
+li.appendChild(edit);
+li.appendChild(del);
+
+list.appendChild(li);
+
+}
+
+document.getElementById("counter").innerText =
+"Tasks left: " + activeCount;
+
+localStorage.setItem("tasks",JSON.stringify(tasks));
+
+}
+
+</script>
+
+</body>
+</html>
